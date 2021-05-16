@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import os
 from sklearn.cluster import KMeans
+from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 from criterion import calculate_i_index, calculate_m_index
 
@@ -19,7 +20,7 @@ def load_dataset():
     dir_list = [i for i in dir_list if i not in exclude_list]
     count = 0
     for file_name in dir_list:
-        data[count] = torch.load(os.path.join(dataset_path, file_name)).numpy()
+        data[count] = savgol_filter(torch.load(os.path.join(dataset_path, file_name)), 51, 3).numpy()
         file_names.append(os.path.join(dataset_path, file_name))
         count += 1
     return data, file_names
@@ -127,9 +128,9 @@ def classify_clusters(cluster_members):
 
 
 if __name__ == "__main__":
-    # dataset, files = load_dataset()
-    # processed_dataset = find_outliers_and_means(dataset, strict_filter=True)
-    # torch.save(torch.from_numpy(processed_dataset), STRICT_PATH)
+    dataset, files = load_dataset()
+    processed_dataset = find_outliers_and_means(dataset, strict_filter=True)
+    torch.save(torch.from_numpy(processed_dataset), STRICT_PATH)
     dataset = torch.load(STRICT_PATH).numpy()
     print(dataset.shape)
     k_arr = np.zeros(shape=(31-2))
